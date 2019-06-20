@@ -8,13 +8,17 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.PagerAdapter
+import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.hamanote.freetalk.base.BaseFragment
+import com.hamanote.freetalk.fragment.FavoriteFragment
 import com.hamanote.freetalk.fragment.HomeFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -37,9 +41,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        val adapter = TabAdapter(supportFragmentManager)
+        val adapter = ViewPagerAdapter(supportFragmentManager)
         val appName = this.packageManager.getPackageInfo(this.packageName, 0).versionName
         adapter.addFragment(HomeFragment(), appName)
+        adapter.addFragment(FavoriteFragment(), "Friend")
+        vp_pager.adapter = adapter
+        adapter.notifyDataSetChanged()
+
+        vp_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageSelected(state: Int) {
+                (adapter.getItem(state) as BaseFragment).onSelected()
+            }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+            override fun onPageScrollStateChanged(position: Int) {}
+        })
+
+
     }
 
     override fun onBackPressed() {
@@ -93,17 +110,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-    private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    private class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
         private val mFragments = ArrayList<Fragment>()
         private val mFragmentTitles = ArrayList<String>()
 
-        override fun getCount(): Int { return mFragments.size }
         fun addFragment(fragment: Fragment, title: String) {
             mFragments.add(fragment)
             mFragmentTitles.add(title)
         }
         override fun getItem(position: Int): Fragment {
             return mFragments.get(position)
+        }
+        override fun getCount(): Int {
+            return mFragments.size
         }
         override fun getItemPosition(`object`: Any?): Int {
             return PagerAdapter.POSITION_NONE
