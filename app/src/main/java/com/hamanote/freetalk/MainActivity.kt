@@ -3,13 +3,19 @@ package com.hamanote.freetalk
 import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.PagerAdapter
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.hamanote.freetalk.fragment.HomeFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -30,6 +36,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        val adapter = TabAdapter(supportFragmentManager)
+        val appName = this.packageManager.getPackageInfo(this.packageName, 0).versionName
+        adapter.addFragment(HomeFragment(), appName)
     }
 
     override fun onBackPressed() {
@@ -81,5 +91,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+        private val mFragments = ArrayList<Fragment>()
+        private val mFragmentTitles = ArrayList<String>()
+
+        override fun getCount(): Int { return mFragments.size }
+        fun addFragment(fragment: Fragment, title: String) {
+            mFragments.add(fragment)
+            mFragmentTitles.add(title)
+        }
+        override fun getItem(position: Int): Fragment {
+            return mFragments.get(position)
+        }
+        override fun getItemPosition(`object`: Any?): Int {
+            return PagerAdapter.POSITION_NONE
+        }
+        override fun getPageTitle(position: Int): CharSequence {
+            return mFragmentTitles.get(position)
+        }
     }
 }
